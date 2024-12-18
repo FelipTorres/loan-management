@@ -93,8 +93,7 @@ class UserController extends Controller
                 ->setDataValidator(new CsvDataValidator())
                 ->setMimeType($uploadedFile->getClientMimeType())
                 ->setSizeInBytes($uploadedFile->getSize())
-                ->setContent($uploadedFile->getContent())
-            ;
+                ->setContent($uploadedFile->getContent());
 
             // ...
 

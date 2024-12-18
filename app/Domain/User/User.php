@@ -135,16 +135,24 @@ class User
         return $this;
     }
 
+    /**
+     * @throws DuplicatedDataException
+     */
     public function checkAlreadyCreatedCpf(): void
     {
-        if (/* find the proper method */) {
+        if ($this->persistence->isCpfAlreadyCreated($this)) {
+
             throw new DuplicatedDataException('CPF already created');
         }
     }
 
+    /**
+     * @throws DuplicatedDataException
+     */
     public function checkAlreadyCreatedEmail(): void
     {
-        if (/* find the proper method */) {
+        if ($this->persistence->isEmailAlreadyCreated($this)) {
+
             throw new DuplicatedDataException('Email already created');
         }
     }
