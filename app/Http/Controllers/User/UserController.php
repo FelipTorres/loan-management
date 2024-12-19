@@ -6,9 +6,7 @@ use App\Domain\File\Csv\CsvDataValidator;
 use App\Domain\File\UserSpreadsheet\UserSpreadsheet;
 use App\Domain\User\User;
 use App\Exceptions\CsvEmptyContentException;
-use App\Exceptions\CsvHeadersValidation;
 use App\Exceptions\DataValidationException;
-use App\Exceptions\DuplicatedDataException;
 use App\Exceptions\InvalidUserObjectException;
 use App\Exceptions\UserSpreadsheetException;
 use App\Http\Controllers\Controller;
@@ -17,6 +15,7 @@ use App\Infra\Db\UserDb;
 use App\Infra\File\Csv\Csv;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -83,32 +82,33 @@ class UserController extends Controller
     public function spreadsheet(Request $request): JsonResponse
     {
         try {
+
             $this->validate($request, ['file' => 'required']);
 
             $uploadedFile = $request->file('file');
 
             $csv = new Csv();
 
-            $csv
-                ->setDataValidator(new CsvDataValidator())
-                ->setMimeType($uploadedFile->getClientMimeType())
-                ->setSizeInBytes($uploadedFile->getSize())
-                ->setContent($uploadedFile->getContent());
+            $csv->setItemsCSV($uploadedFile);
 
-            // ...
+            $userSpreadsheet = new UserSpreadsheet();
+
+            $userSpreadsheet->setItemsUserSpreadSheet($csv);
+
+            $usersFromFile = $userSpreadsheet->buildUsersFromContent();
+
+            $user = new User(new UserDb());
+
+            $user->createFromBatch($usersFromFile);
 
             return $this->buildCreatedResponse([
-                'created_users' => count([]),
+                'created_users' => count($usersFromFile),
                 'date_time' => DateTime::formatDateTime('now')
             ]);
-        } catch (DataValidationException | CsvHeadersValidation $e) {
+
+        } catch (InvalidUserObjectException | ValidationException | UserSpreadsheetException $e) {
+
             return $this->buildBadRequestResponse($e->getMessage());
-        } catch (UserSpreadsheetException | DuplicatedDataException $e) {
-            return $this->buildBadRequestResponse($e->getMessage());
-        } catch (InvalidUserObjectException $e) {
-            return $this->buildBadRequestResponse($e->getMessage());
-        } catch (\Exception $e) {
-            throw $e;
         }
     }
 

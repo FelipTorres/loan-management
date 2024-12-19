@@ -5,7 +5,7 @@ namespace App\Domain\User;
 use App\Domain\Uuid\UuidGeneratorInterface;
 use App\Exceptions\DuplicatedDataException;
 use App\Exceptions\InvalidUserObjectException;
-use App\Exceptions\UserNotFoundException;
+use App\Infra\Uuid\UuidGenerator;
 
 class User
 {
@@ -136,9 +136,36 @@ class User
     }
 
     /**
+     * @throws InvalidUserObjectException
+     */
+    public function createFromBatch(array $users): void
+    {
+        $this->checkUsers($users);
+
+        foreach ($users as $user) {
+
+            $this->persistence->create($user);
+        }
+    }
+
+    /**
+     * @throws InvalidUserObjectException
+     */
+    private function checkUsers(array $users): void
+    {
+        foreach($users as $user) {
+
+            if ($user::class !== $this::class) {
+
+                throw new InvalidUserObjectException('The users array must have only users');
+            }
+        }
+    }
+
+    /**
      * @throws DuplicatedDataException
      */
-    public function checkAlreadyCreatedCpf(): void
+    public function verifyAlreadyCreatedCpf(): void
     {
         if ($this->persistence->isCpfAlreadyCreated($this)) {
 
@@ -149,7 +176,7 @@ class User
     /**
      * @throws DuplicatedDataException
      */
-    public function checkAlreadyCreatedEmail(): void
+    public function verifyAlreadyCreatedEmail(): void
     {
         if ($this->persistence->isEmailAlreadyCreated($this)) {
 
@@ -160,5 +187,16 @@ class User
     public function findAll(): array
     {
         return $this->persistence->findAll($this);
+    }
+
+    public function setItemsUser(UuidGenerator $uuidGenerator, string $name, string $cpf, string $email): void
+    {
+        $this->setDataValidator(new UserDataValidator())
+            ->setUuidGenerator($uuidGenerator)
+            ->setName(utf8_decode($name))
+            ->setCpf($cpf)
+            ->setEmail($email)
+            ->generateId()
+            ->setDateCreation(date('Y-m-d H:i:s'));
     }
 }

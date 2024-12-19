@@ -22,20 +22,18 @@ class Controller extends BaseController
     public function buildCreatedResponse(mixed $data): JsonResponse
     {
         return response()->json(
-            $data,
-            self::HTTP_CREATED_STATUS,
-            [],
-            JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT
+            data: $data,
+            status: self::HTTP_CREATED_STATUS,
+            options: JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT
         );
     }
 
     public function buildSuccessResponse(mixed $data): JsonResponse
     {
         return response()->json(
-            $data,
-            self::HTTP_SUCCESS_STATUS,
-            [],
-            JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT
+            data: $data,
+            status: self::HTTP_SUCCESS_STATUS,
+            options: JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT
         );
     }
 }
