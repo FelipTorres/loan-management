@@ -8,7 +8,7 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     public const HTTP_SUCCESS_STATUS = 200;
-    public const HTTP_CREATED_STATUS = 500;
+    public const HTTP_CREATED_STATUS = 201;
     public const HTTP_BAD_REQUEST_STATUS = 400;
 
     public function buildBadRequestResponse(string $errorMessage): JsonResponse
