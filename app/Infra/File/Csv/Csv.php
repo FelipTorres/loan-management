@@ -210,4 +210,13 @@ class Csv extends File implements CsvInterface
 
         return $rows;
     }
+
+    public function generateCsvContent(array $users): string
+    {
+        $header = "name,cpf,email\n";
+
+        $rows = array_map(fn($user) => "{$user->getName()},{$user->getCpf()},{$user->getEmail()}", $users);
+
+        return $header . implode("\n", $rows);
+    }
 }

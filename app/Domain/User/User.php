@@ -199,4 +199,11 @@ class User
             ->generateId()
             ->setDateCreation(date('Y-m-d H:i:s'));
     }
+
+    public function validateAndGetUsers(): array
+    {
+        $this->setDataValidator(new UserDataValidator());
+
+        return $this->findAll();
+    }
 }

@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Domain\File\Csv\CsvDataValidator;
 use App\Domain\File\UserSpreadsheet\UserSpreadsheet;
 use App\Domain\User\User;
-use App\Exceptions\CsvEmptyContentException;
-use App\Exceptions\DataValidationException;
 use App\Exceptions\InvalidUserObjectException;
 use App\Exceptions\UserSpreadsheetException;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\DateTime;
 use App\Infra\Db\UserDb;
 use App\Infra\File\Csv\Csv;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -171,7 +171,8 @@ class UserController extends Controller
             }
 
             return $this->buildSuccessResponse($response);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
+
             throw $e;
         }
     }
@@ -201,26 +202,22 @@ class UserController extends Controller
      *     ),
      * )
      */
-    public function createSpreadsheet(Request $request): JsonResponse
+    public function createSpreadsheet(): JsonResponse
     {
-        try {
-            $user = new User(new UserDb());
+        $user = new User(new UserDb());
+        $allUsers = $user->validateAndGetUsers();
 
-            $csv = new Csv();
+        $csv = new Csv();
+        $csv->setDataValidator(new CsvDataValidator());
 
-            $userSpreadsheet = new UserSpreadsheet();
+        $userSpreadsheet = new UserSpreadsheet();
+        $userSpreadsheet->setUsers($allUsers)
+            ->setCsv($csv);
 
-            $content = 'find-the-way-to-build-the-content';
+        $response = [
+            'csv' => $csv->generateCsvContent($allUsers)
+        ];
 
-            return $this->buildSuccessResponse([
-                'csv' => $content
-            ]);
-        } catch (DataValidationException | CsvEmptyContentException $e) {
-            return $this->buildBadRequestResponse($e->getMessage());
-        } catch (UserSpreadsheetException $e) {
-            return $this->buildBadRequestResponse($e->getMessage());
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        return $this->buildSuccessResponse($response);
     }
 }
