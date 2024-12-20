@@ -6,6 +6,7 @@ use App\Domain\File\Csv\CsvDataValidator;
 use App\Domain\File\UserSpreadsheet\UserSpreadsheet;
 use App\Domain\User\User;
 use App\Exceptions\InvalidUserObjectException;
+use App\Exceptions\UserNotFoundException;
 use App\Exceptions\UserSpreadsheetException;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\DateTime;
@@ -96,9 +97,9 @@ class UserController extends Controller
 
             $usersFromFile = $userSpreadsheet->buildUsersFromContent();
 
-            $user = new User(new UserDb());
+            $userInstance = new User(new UserDb());
 
-            $user->createFromBatch($usersFromFile);
+            $userInstance->createFromBatch($usersFromFile);
 
             return $this->buildCreatedResponse([
                 'created_users' => count($usersFromFile),
@@ -156,9 +157,9 @@ class UserController extends Controller
     public function all(): JsonResponse
     {
         try {
-            $user = new User(new UserDb());
+            $userInstance = new User(new UserDb());
 
-            $users = $user->findAll();
+            $users = $userInstance->findAll();
 
             $response = [];
             foreach($users as $user) {
@@ -171,6 +172,7 @@ class UserController extends Controller
             }
 
             return $this->buildSuccessResponse($response);
+
         } catch (Exception $e) {
 
             throw $e;
@@ -204,8 +206,8 @@ class UserController extends Controller
      */
     public function createSpreadsheet(): JsonResponse
     {
-        $user = new User(new UserDb());
-        $allUsers = $user->validateAndGetUsers();
+        $userInstance = new User(new UserDb());
+        $allUsers = $userInstance->validateAndGetUsers();
 
         $csv = new Csv();
         $csv->setDataValidator(new CsvDataValidator());
@@ -219,5 +221,85 @@ class UserController extends Controller
         ];
 
         return $this->buildSuccessResponse($response);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/user/{uuid}",
+     *     summary="Busca um usuário pelo UUID",
+     *     tags={"User"},
+     *     @OA\Parameter(
+     *         name="uuid",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response="200",
+     *          description="OK",
+     *          content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="id",
+     *                         type="string",
+     *                     ),
+     *                     @OA\Property(
+     *                         property="name",
+     *                         type="string",
+     *                     ),
+     *                     @OA\Property(
+     *                         property="email",
+     *                         type="string",
+     *                     ),
+     *                     @OA\Property(
+     *                         property="cpf",
+     *                         type="string",
+     *                     ),
+     *                     example={
+     *                        "id": "a38a7ac8-9295-33c2-8c0b-5767c1449bc3",
+     *                        "name": "Ronaldo de Assis Moreira",
+     *                        "email": "ronaldinho@email.com",
+     *                        "cpf": "94965217039"
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     *     @OA\Response(
+     *          response="400",
+     *          description="The user does not exist",
+     *          content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="error",
+     *                         type="string",
+     *                     ),
+     *                     example={
+     *                        "bad_request": "The user does not exist"
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     * )
+     */
+    public function findById(string $uuid): JsonResponse
+    {
+        try {
+            $userInstance = new User(new UserDb());
+            $user = $userInstance->findById($uuid);
+
+            return $this->buildSuccessResponse($user);
+
+        } catch (UserNotFoundException|Exception $e) {
+
+            return $this->buildBadRequestResponse($e->getMessage());
+        }
     }
 }

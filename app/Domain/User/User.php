@@ -5,7 +5,11 @@ namespace App\Domain\User;
 use App\Domain\Uuid\UuidGeneratorInterface;
 use App\Exceptions\DuplicatedDataException;
 use App\Exceptions\InvalidUserObjectException;
+use App\Exceptions\UserNotFoundException;
 use App\Infra\Uuid\UuidGenerator;
+use Exception;
+use Ramsey\Uuid\Uuid;
+use stdClass;
 
 class User
 {
@@ -205,5 +209,26 @@ class User
         $this->setDataValidator(new UserDataValidator());
 
         return $this->findAll();
+    }
+
+    /**
+     * @throws UserNotFoundException
+     * @throws Exception
+     */
+    public function findById(string $uuid): stdClass
+    {
+        if (!Uuid::isValid($uuid)) {
+
+            throw new Exception('The UUID is invalid');
+        }
+
+        $user = $this->persistence->findById($uuid);
+
+        if (!$user) {
+
+            throw new UserNotFoundException('The user does not exist');
+        }
+
+        return $user;
     }
 }

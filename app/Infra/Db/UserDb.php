@@ -6,6 +6,7 @@ use App\Domain\User\User;
 use App\Domain\User\UserDataValidator;
 use App\Domain\User\UserPersistenceInterface;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class UserDb implements UserPersistenceInterface
 {
@@ -87,5 +88,19 @@ class UserDb implements UserPersistenceInterface
         DB::table(self::TABLE_NAME)
             ->where(self::COLUMN_UUID, $user->getId())
             ->update([self::COLUMN_NAME => $user->getName()]);
+    }
+
+    public function findById(string $uuid): ?stdClass
+    {
+        return DB::table(self::TABLE_NAME)
+            ->select([
+                self::COLUMN_UUID,
+                self::COLUMN_NAME,
+                self::COLUMN_EMAIL,
+                self::COLUMN_CPF,
+            ])
+            ->where(self::COLUMN_UUID, $uuid)
+            ->whereNull(self::COLUMN_DELETED_AT)
+            ->first();
     }
 }

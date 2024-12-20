@@ -2,6 +2,8 @@
 
 namespace App\Domain\User;
 
+use stdClass;
+
 interface UserPersistenceInterface
 {
     public function create(User $user): void;
@@ -10,4 +12,5 @@ interface UserPersistenceInterface
     public function findAll(User $user): array;
     public function isExistentId(User $user): bool;
     public function editName(User $user): void;
+    public function findById(string $uuid): ?stdClass;
 }
