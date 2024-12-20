@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Domain\File\Csv\CsvDataValidator;
 use App\Domain\File\UserSpreadsheet\UserSpreadsheet;
 use App\Domain\User\User;
 use App\Exceptions\CsvEmptyContentException;

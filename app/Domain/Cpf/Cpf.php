@@ -28,9 +28,7 @@ class Cpf
 
     private function isValidNumber(): bool
     {
-        $cpf = $this->cpf;
-
-        $cpf = preg_replace('/[^0-9]/', '', $cpf);
+        $cpf = preg_replace('/[^0-9]/', '', $this->cpf);
 
         if (preg_match('/(\d)\1{10}/', $cpf)) {
 
@@ -43,12 +41,12 @@ class Cpf
 
             for ($index = 0; $index < $position; $index++) {
 
-                $sum += $this->cpf[$index] * (($position + 1) - $index);
+                $sum += $cpf[$index] * (($position + 1) - $index);
             }
 
             $digit = ((10 * $sum) % 11) % 10;
 
-            if ($this->cpf[$index] != $digit) {
+            if ($cpf[$index] != $digit) {
 
                 return false;
             }

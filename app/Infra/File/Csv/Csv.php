@@ -102,7 +102,7 @@ class Csv extends File implements CsvInterface
 
         if (count($expectedHeaders) !== count($headers)) {
 
-            throw new CsvHeadersValidation(self::INVALID_CSV_FILE_MESSAGE);
+            throw new CsvHeadersValidation(self::INVALID_CSV_FILE_MESSAGE, 400);
         }
 
         foreach ($expectedHeaders as $expectedHeader) {
