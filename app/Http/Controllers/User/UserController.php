@@ -153,7 +153,7 @@ class UserController extends Controller
      *     ),
      * )
      */
-    public function all(Request $request): JsonResponse
+    public function all(): JsonResponse
     {
         try {
             $user = new User(new UserDb());
