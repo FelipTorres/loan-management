@@ -303,6 +303,57 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/user/{uuid}",
+     *     summary="Deleta um usuário pelo UUID",
+     *     tags={"User"},
+     *     @OA\Parameter(
+     *         name="uuid",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response="200",
+     *          description="OK",
+     *          content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="message",
+     *                         type="string",
+     *                     ),
+     *                     example={
+     *                        "message": "User deleted successfully"
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     *     @OA\Response(
+     *          response="400",
+     *          description="Bad Request",
+     *          content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="error",
+     *                         type="string",
+     *                     ),
+     *                     example={
+     *                        "error": "The user does not exist"
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     * )
+     */
     public function deleteById(string $uuid): JsonResponse
     {
         try {
