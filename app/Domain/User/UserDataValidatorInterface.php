@@ -10,4 +10,6 @@ interface UserDataValidatorInterface
     public function validateCpf(string $cpf): void;
     public function validateDateCreation(string $dateCreation): void;
     public function validateDateEdition(string $dateEdition): void;
+    public function validateUuid(string $uuid): void;
+    public function validateUserExists(?User $user): void;
 }

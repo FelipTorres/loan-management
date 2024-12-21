@@ -5,20 +5,21 @@ namespace App\Domain\User;
 use App\Domain\Uuid\UuidGeneratorInterface;
 use App\Exceptions\DuplicatedDataException;
 use App\Exceptions\InvalidUserObjectException;
-use App\Exceptions\UserNotFoundException;
 use App\Infra\Uuid\UuidGenerator;
 use Exception;
-use Ramsey\Uuid\Uuid;
-use stdClass;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User
+class User extends Model
 {
+    use SoftDeletes;
     private string $id;
     private string $name;
     private string $email;
     private string $cpf;
     private string $dateCreation;
     private string $dateEdition;
+    protected string $dateDeleted;
 
     private UserDataValidatorInterface $dataValidator;
     private UuidGeneratorInterface $uuidGenerator;
@@ -212,23 +213,44 @@ class User
     }
 
     /**
-     * @throws UserNotFoundException
      * @throws Exception
      */
-    public function findById(string $uuid): stdClass
+    public function findById(string $uuid): array
     {
-        if (!Uuid::isValid($uuid)) {
+        $this->setDataValidator(new UserDataValidator());
 
-            throw new Exception('The UUID is invalid');
-        }
+        $this->getDataValidator()->validateUuid($uuid);
 
         $user = $this->persistence->findById($uuid);
 
-        if (!$user) {
+        $this->getDataValidator()->validateUserExists($user);
 
-            throw new UserNotFoundException('The user does not exist');
-        }
+        return $this->buildUserResponse($user);
+    }
 
-        return $user;
+    public function deleteById(string $uuid): array
+    {
+        $this->setDataValidator(new UserDataValidator());
+
+        $this->getDataValidator()->validateUuid($uuid);
+
+        $user = $this->persistence->findById($uuid);
+
+        $this->getDataValidator()->validateUserExists($user);
+
+        $this->persistence->deleteById($user);
+
+        return $this->buildUserResponse($user);
+    }
+
+    public function buildUserResponse(User $user): array
+    {
+        return [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'cpf' => $user->getCpf(),
+            'email' => $user->getEmail(),
+            'dateCreation' => $user->getDateCreation(),
+        ];
     }
 }

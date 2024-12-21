@@ -4,6 +4,9 @@ namespace App\Domain\User;
 
 use App\Domain\Cpf\Cpf;
 use App\Exceptions\DataValidationException;
+use App\Exceptions\UserNotFoundException;
+use Exception;
+use Ramsey\Uuid\Uuid;
 
 class UserDataValidator implements UserDataValidatorInterface
 {
@@ -113,6 +116,28 @@ class UserDataValidator implements UserDataValidatorInterface
         if (!\DateTime::createFromFormat('Y-m-d H:i:s', $dateEdition)) {
 
             throw new DataValidationException('The user date edition is not in a valid format');
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function validateUuid(string $uuid): void
+    {
+        if (!Uuid::isValid($uuid)) {
+
+            throw new Exception('The UUID is invalid');
+        }
+    }
+
+    /**
+     * @throws UserNotFoundException
+     */
+    public function validateUserExists(?User $user): void
+    {
+        if (!$user) {
+
+            throw new UserNotFoundException('The user does not exist');
         }
     }
 }

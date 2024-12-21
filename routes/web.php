@@ -7,4 +7,5 @@ $router->group(['prefix' => 'user'], function () use ($router) {
     $router->get('/spreadsheet', 'User\UserController@createSpreadsheet');
     $router->get('/', 'User\UserController@all');
     $router->get('/{uuid}', 'User\UserController@findById');
+    $router->delete('/{uuid}', 'User\UserController@deleteById');
 });

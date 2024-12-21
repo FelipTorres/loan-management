@@ -302,4 +302,19 @@ class UserController extends Controller
             return $this->buildBadRequestResponse($e->getMessage());
         }
     }
+
+    public function deleteById(string $uuid): JsonResponse
+    {
+        try {
+            $userInstance = new User(new UserDb());
+
+            $user = $userInstance->deleteById($uuid);
+
+            return $this->buildSuccessResponse($user);
+
+        } catch (Exception $e) {
+
+            return $this->buildBadRequestResponse($e->getMessage());
+        }
+    }
 }
