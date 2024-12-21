@@ -354,12 +354,121 @@ class UserController extends Controller
      *     ),
      * )
      */
-    public function deleteById(string $uuid): JsonResponse
+    public function delete(string $uuid): JsonResponse
     {
         try {
             $userInstance = new User(new UserDb());
 
             $user = $userInstance->deleteById($uuid);
+
+            return $this->buildSuccessResponse($user);
+
+        } catch (Exception $e) {
+
+            return $this->buildBadRequestResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/user/{uuid}",
+     *     summary="Atualiza um usuário pelo UUID",
+     *     tags={"User"},
+     *     @OA\Parameter(
+     *         name="uuid",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="name",
+     *                 type="string",
+     *                 example="Ronaldo de Assis Moreira"
+     *             ),
+     *             @OA\Property(
+     *                 property="cpf",
+     *                 type="string",
+     *                 example="16742019077"
+     *             ),
+     *             @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 example="ronaldinho@email.com"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response="200",
+     *          description="OK",
+     *          content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="id",
+     *                         type="string",
+     *                     ),
+     *                     @OA\Property(
+     *                         property="name",
+     *                         type="string",
+     *                     ),
+     *                     @OA\Property(
+     *                         property="email",
+     *                         type="string",
+     *                     ),
+     *                     @OA\Property(
+     *                         property="cpf",
+     *                         type="string",
+     *                     ),
+     *                     example={
+     *                        "id": "a38a7ac8-9295-33c2-8c0b-5767c1449bc3",
+     *                        "name": "Ronaldo de Assis Moreira",
+     *                        "email": "ronaldinho@email.com",
+     *                        "cpf": "16742019077"
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     *     @OA\Response(
+     *          response="400",
+     *          description="Bad Request",
+     *          content={
+     *             @OA\MediaType(
+     *                 mediaType="application/json",
+     *                 @OA\Schema(
+     *                     @OA\Property(
+     *                         property="error",
+     *                         type="string",
+     *                     ),
+     *                     example={
+     *                        "error": "Sent parameters are not valid"
+     *                     }
+     *                 )
+     *             )
+     *         }
+     *     ),
+     * )
+     */
+    public function update(Request $request, string $uuid): JsonResponse
+    {
+        try {
+            $userInstance = new User(new UserDb());
+
+            $data = $request->only(['name', 'cpf', 'email']);
+
+            $this->validate($request, [
+                'name' => 'sometimes|required|string|max:255',
+                'cpf' => 'sometimes|required|string|max:11',
+                'email' => 'sometimes|required|string|email|max:255',
+            ]);
+
+            $user = $userInstance->updateById($uuid, $data);
 
             return $this->buildSuccessResponse($user);
 

@@ -12,4 +12,5 @@ interface UserPersistenceInterface
     public function editName(User $user): void;
     public function findById(string $uuid): ?User;
     public function deleteById(User $user): void;
+    public function updateById(User $user, array $data): void;
 }

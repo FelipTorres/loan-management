@@ -140,4 +140,15 @@ class UserDataValidator implements UserDataValidatorInterface
             throw new UserNotFoundException('The user does not exist');
         }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function validateRequestToUpdate(array $data): void
+    {
+        if (!$data) {
+
+            throw new Exception('Sent parameters are not valid');
+        }
+    }
 }

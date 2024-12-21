@@ -119,4 +119,11 @@ class UserDb implements UserPersistenceInterface
             ->where(self::COLUMN_UUID, $user->getId())
             ->update([self::COLUMN_DELETED_AT => Carbon::now()]);
     }
+
+    public function updateById(User $user, array $data): void
+    {
+        DB::table(self::TABLE_NAME)
+            ->where(self::COLUMN_UUID, $user->getId())
+            ->update($data);
+    }
 }

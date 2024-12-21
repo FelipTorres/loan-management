@@ -219,11 +219,13 @@ class User extends Model
     {
         $this->setDataValidator(new UserDataValidator());
 
-        $this->getDataValidator()->validateUuid($uuid);
+        $dataValidator = $this->getDataValidator();
+
+        $dataValidator->validateUuid($uuid);
 
         $user = $this->persistence->findById($uuid);
 
-        $this->getDataValidator()->validateUserExists($user);
+        $dataValidator->validateUserExists($user);
 
         return $this->buildUserResponse($user);
     }
@@ -232,15 +234,76 @@ class User extends Model
     {
         $this->setDataValidator(new UserDataValidator());
 
-        $this->getDataValidator()->validateUuid($uuid);
+        $dataValidator = $this->getDataValidator();
+
+        $dataValidator->validateUuid($uuid);
 
         $user = $this->persistence->findById($uuid);
 
-        $this->getDataValidator()->validateUserExists($user);
+        $dataValidator->validateUserExists($user);
 
         $this->persistence->deleteById($user);
 
         return $this->buildUserResponse($user);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function updateById(string $uuid, array $data): array
+    {
+        $this->setDataValidator(new UserDataValidator());
+
+        $dataValidator = $this->getDataValidator();
+
+        $dataValidator->validateUuid($uuid);
+
+        $user = $this->persistence->findById($uuid);
+
+        $dataValidator->validateUserExists($user);
+
+        $dataValidated = $this->validateData($data);
+
+        $this->persistence->updateById($user, $dataValidated);
+
+        $user = $this->persistence->findById($uuid);
+
+        return $this->buildUserResponse($user);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function validateData(array $data): array
+    {
+        $newItems  = [];
+
+        $dataValidator = $this->getDataValidator();
+
+        $dataValidator->validateRequestToUpdate($data);
+
+        if (isset($data['name'])) {
+
+            $dataValidator->validateName($data['name']);
+
+            $newItems['name'] = $data['name'];
+        }
+
+        if (isset($data['email'])) {
+
+            $dataValidator->validateEmail($data['email']);
+
+            $newItems['email'] = $data['email'];
+        }
+
+        if (isset($data['cpf'])) {
+
+            $dataValidator->validateCpf($data['cpf']);
+
+            $newItems['cpf'] = $data['cpf'];
+        }
+
+        return $newItems;
     }
 
     public function buildUserResponse(User $user): array
