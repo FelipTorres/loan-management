@@ -7,20 +7,15 @@ use App\Exceptions\DuplicatedDataException;
 use App\Exceptions\InvalidUserObjectException;
 use App\Infra\Uuid\UuidGenerator;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Model
+class User
 {
-    use SoftDeletes;
     private string $id;
     private string $name;
     private string $email;
     private string $cpf;
     private string $dateCreation;
     private string $dateEdition;
-    protected string $dateDeleted;
-
     private UserDataValidatorInterface $dataValidator;
     private UuidGeneratorInterface $uuidGenerator;
     private UserPersistenceInterface $persistence;

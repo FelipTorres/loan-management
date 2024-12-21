@@ -10,3 +10,8 @@ $router->group(['prefix' => 'user'], function () use ($router) {
     $router->delete('/{uuid}', 'User\UserController@delete');
     $router->put('/{uuid}', 'User\UserController@update');
 });
+
+$router->group(['prefix' => 'eligibility'], function () use ($router) {
+
+    $router->get('/{userUuid}', 'Eligibility\EligibilityController@check');
+});
