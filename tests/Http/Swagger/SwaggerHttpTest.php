@@ -9,13 +9,10 @@ class SwaggerHttpTest extends TestCase
     public function testShouldCorrectlyReturnApiDocs(): void
     {
         $response = $this
-            ->call(
-                'GET',
-                '/api-swagger'
-            )
-        ;
+            ->call('GET', '/api-docs');
 
         $response->assertStatus(self::HTTP_SUCCESS_STATUS);
+
         $response->assertJson([
             'openapi' => '3.0.0'
         ]);

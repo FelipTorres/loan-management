@@ -54,13 +54,15 @@ class SwaggerController extends Controller
     public function docs()
     {
         try {
-            $docBlocksPath = '/var/www/html/app/Http/Controllers/';
+            $docBlocksPath = base_path('app/Http/Controllers/');
 
             $swagger = (new Swagger())->setDocBlocksPath($docBlocksPath);
 
-            return $swagger->generateDocumentation();
+            return response()->json($swagger->generateDocumentation());
+
         } catch (\Exception $e) {
-            $this->buildBadRequestResponse($e->getMessage());
+
+            return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 }
