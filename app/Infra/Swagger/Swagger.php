@@ -2,11 +2,14 @@
 
 namespace App\Infra\Swagger;
 
+use OpenApi\Annotations\OpenApi;
+use OpenApi\Generator;
+
 class Swagger
 {
     private string $docBlocksPath;
 
-    // private OpenApi $openApiDocumentation;
+    private OpenApi $openApiDocumentation;
 
     public function setDocBlocksPath(string $docBlocksPath): Swagger
     {
@@ -15,10 +18,10 @@ class Swagger
         return $this;
     }
 
-    // public function generateDocumentation(): OpenApi
-    // {
-    //     $this->openApiDocumentation = Generator::scan([$this->docBlocksPath]);
+    public function generateDocumentation(): OpenApi
+    {
+        $this->openApiDocumentation = Generator::scan([$this->docBlocksPath]);
 
-    //     return $this->openApiDocumentation;
-    // }
+        return $this->openApiDocumentation;
+    }
 }
