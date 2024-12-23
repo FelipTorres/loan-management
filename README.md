@@ -38,3 +38,4 @@
 
 > [!IMPORTANT]
 > Follow the received instructions to complete the tasks
+> To populate the partner_companies and employees tables, Seeders were created. The following are the reference classes: PartnerCompaniesSeeder and EmployeesSeeder.
