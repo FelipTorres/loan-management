@@ -46,7 +46,7 @@ class UserDb implements UserPersistenceInterface
             ->exists();
     }
 
-    public function findAll(User $user): array
+    public function findAll(): array
     {
         $users = [];
 

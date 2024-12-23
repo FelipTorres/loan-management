@@ -5,6 +5,7 @@ namespace Tests\Unit\User;
 use App\Domain\User\User;
 use App\Domain\User\UserDataValidator;
 use App\Exceptions\DataValidationException;
+use App\Exceptions\InvalidUserObjectException;
 use App\Infra\File\Csv\Csv;
 use App\Infra\Memory\UserMemory;
 use Tests\TestCase;
@@ -32,8 +33,7 @@ class UserTest extends TestCase
             ->setId($this->faker->uuid())
             ->setName($this->faker->name())
             ->setEmail($this->faker->email())
-            ->setCpf(self::VALID_CPF)
-        ;
+            ->setCpf(self::VALID_CPF);
 
         $this->assertNotEmpty($user->getName());
     }
@@ -43,7 +43,7 @@ class UserTest extends TestCase
         $user = (new User(new UserMemory()))->setDataValidator(new UserDataValidator());
 
         $this->expectException(DataValidationException::class);
-        $this->expectExceptionMessage('The user id is not valid');
+        $this->expectExceptionMessage('The user ID is not a valid UUID');
 
         $user->setId('invalid-id');
     }
@@ -53,7 +53,7 @@ class UserTest extends TestCase
         $user = (new User(new UserMemory()))->setDataValidator(new UserDataValidator());
 
         $this->expectException(DataValidationException::class);
-        $this->expectExceptionMessage('The user id is not valid');
+        $this->expectExceptionMessage('The user ID is not a valid UUID');
 
         $user->setId('this-id-is-not-compatible-with-the-method-validation');
     }
@@ -63,7 +63,7 @@ class UserTest extends TestCase
         $user = (new User(new UserMemory()))->setDataValidator(new UserDataValidator());
 
         $this->expectException(DataValidationException::class);
-        $this->expectExceptionMessage('The user id is not valid');
+        $this->expectExceptionMessage('The user ID is not a valid UUID');
 
         $user->setId('');
     }
@@ -193,7 +193,7 @@ class UserTest extends TestCase
 
         $user->setDateEdition('2023-12-30 16:30:00');
 
-        $this->assertNotEmpty($user->getDateCreation());
+        $this->assertNotEmpty($user->getDateEdition());
     }
 
     public function testShouldThrowAnExceptionWhenTryToSetEmptyDateEdition(): void
@@ -226,6 +226,9 @@ class UserTest extends TestCase
         (new User(new UserMemory()))->createFromBatch($batch);
     }
 
+    /**
+     * @throws InvalidUserObjectException
+     */
     public function testShouldCorrectlyCreateFromBatch(): void
     {
         $user = (new User(new UserMemory()))
@@ -233,11 +236,97 @@ class UserTest extends TestCase
             ->setId($this->faker->uuid())
             ->setName($this->faker->name())
             ->setEmail($this->faker->email())
-            ->setCpf(self::VALID_CPF)
-        ;
+            ->setCpf(self::VALID_CPF);
 
         (new User(new UserMemory()))->createFromBatch([$user]);
 
         $this->assertNotEmpty($user->getName());
+    }
+
+    public function testShouldCorrectlyCreateUserWithValidData(): void
+    {
+        $user = (new User(new UserMemory()))
+            ->setDataValidator(new UserDataValidator())
+            ->setId($this->faker->uuid())
+            ->setName($this->faker->name())
+            ->setEmail($this->faker->email())
+            ->setCpf(self::VALID_CPF);
+
+        $this->assertNotEmpty($user->getId());
+        $this->assertNotEmpty($user->getName());
+        $this->assertNotEmpty($user->getEmail());
+        $this->assertNotEmpty($user->getCpf());
+    }
+
+    public function testShouldCorrectlyEditUser(): void
+    {
+        $user = (new User(new UserMemory()))
+            ->setDataValidator(new UserDataValidator())
+            ->setId($this->faker->uuid())
+            ->setName($this->faker->name())
+            ->setEmail($this->faker->email())
+            ->setCpf(self::VALID_CPF);
+
+        $newName = 'Edited Name';
+        $user->setName($newName);
+
+        $this->assertEquals($newName, $user->getName());
+    }
+
+    public function testShouldCorrectlyDeleteUser(): void
+    {
+        $userMemory = new UserMemory();
+        $user = (new User($userMemory))
+            ->setDataValidator(new UserDataValidator())
+            ->setId($this->faker->uuid())
+            ->setName($this->faker->name())
+            ->setEmail($this->faker->email())
+            ->setCpf(self::VALID_CPF);
+
+        $userMemory->create($user);
+        $userMemory->deleteById($user);
+
+        $this->assertNull($userMemory->findById($user->getId()));
+    }
+
+    public function testShouldFindUserById(): void
+    {
+        $userMemory = new UserMemory();
+        $user = (new User($userMemory))
+            ->setDataValidator(new UserDataValidator())
+            ->setId($this->faker->uuid())
+            ->setName($this->faker->name())
+            ->setEmail($this->faker->email())
+            ->setCpf(self::VALID_CPF);
+
+        $userMemory->create($user);
+        $foundUser = $userMemory->findById($user->getId());
+
+        $this->assertEquals($user->getId(), $foundUser->getId());
+    }
+
+    public function testShouldFindAllUsers(): void
+    {
+        $userMemory = new UserMemory();
+        $user1 = (new User($userMemory))
+            ->setDataValidator(new UserDataValidator())
+            ->setId($this->faker->uuid())
+            ->setName($this->faker->name())
+            ->setEmail($this->faker->email())
+            ->setCpf(self::VALID_CPF);
+
+        $user2 = (new User($userMemory))
+            ->setDataValidator(new UserDataValidator())
+            ->setId($this->faker->uuid())
+            ->setName($this->faker->name())
+            ->setEmail($this->faker->email())
+            ->setCpf(self::VALID_CPF);
+
+        $userMemory->create($user1);
+        $userMemory->create($user2);
+
+        $allUsers = $userMemory->findAll();
+
+        $this->assertCount(2, $allUsers);
     }
 }
